@@ -17,14 +17,12 @@ d. Que se passe-t-il quand la résolution du quantificateur devient 1 bit/ech ?
 
 Ecouter fichier [pcm_1bits.wav](PCM/pcm_1bits.wav)
 
-**Analyse :** À 1 bit/échantillon, le quantificateur ne conserve que le signe du signal (positif ou négatif). Le signal reconstruit est une onde carrée alternant entre +1 et -1. Le son devient très mauvais, limite impossible à écouter, car seule la fréquence fondamentale est partiellement préservée avec de nombreuses harmoniques parasites. Le SNR est minimal.
+**Analyse :** À 1 bit/échantillon, le quantificateur ne conserve que le signe du signal (positif ou négatif). Le signal reconstruit est une onde carrée alternant entre +1 et -1. Le son devient très mauvais, limite impossible à écouter, car seule la fréquence fondamentale est partiellement préservée avec de nombreuses harmoniques parasites.
 
 **Graphiques de comparaison :**
 
 - [pcm_comparison.png](PCM/pcm_comparison.png) - Comparaisons individuelles pour chaque résolution
 - [pcm_all_comparison.png](PCM/pcm_all_comparison.png) - Superposition de tous les niveaux
-
-**Conclusion PCM :** La résolution de quantification a un impact direct sur la qualité. Le SNR diminue d'environ 6 dB par bit perdu. Pour une qualité acceptable, un minimum de 4-6 bits est nécessaire, tandis que 8 bits garantissent une excellente qualité.
 
 ## Analyse du DPCM
 
@@ -37,9 +35,9 @@ Ecouter fichier [pcm_1bits.wav](PCM/pcm_1bits.wav)
 
 **Analyse des résultats :**
 
-- **Avec p = 10^-2 :** Le SNR chute fortement. Des artefacts sonores apparaissent. Le signal reste reconnaissable mais la qualité est dégradée de manière notable.
+- **Avec p = 10^-2 :** Des erreurs sonores apparaissent. Le signal reste reconnaissable mais la qualité est dégradée de manière notable.
 
-- **Avec p = 10^-3 :** La qualité reste correcte avec un SNR nettement meilleur. Les erreurs sont moins perceptibles et espacées. Le signal est proche de la qualité sans erreur.
+- **Avec p = 10^-3 :** La qualité reste correcte=. Les erreurs sont moins perceptibles et espacées. Le signal est proche de la qualité sans erreur.
 
 **Graphique comparatif :** [dpcm_comparison.png](DPCM/dpcm_comparison.png)
 
@@ -83,23 +81,3 @@ Ecouter fichier [xtine_dpcm_R8_errors_p1e_02.wav](XTINE_DPCM/xtine_dpcm_R8_error
 - L'oreille humaine est plus tolérante aux artefacts dans la parole que dans les tons purs
 
 **Conclusion :** Le DPCM à 8 bits est adapté pour la compression de la parole, mais un taux d'erreur de 10^-2 introduit des dégradations audibles. Pour des applications critiques (téléphonie, streaming), un taux d'erreur < 10^-3 est recommandé, avec des mécanismes de protection (codes correcteurs d'erreurs, réinitialisation périodique du prédicteur).
-
----
-
-## Synthèse générale
-
-**PCM (Pulse Code Modulation) :**
-
-- Simple et robuste
-- Qualité directement liée au nombre de bits
-- Indépendance entre échantillons = excellente résistance aux erreurs
-- Débit élevé (pas de compression)
-
-**DPCM (Differential PCM) :**
-
-- Exploite la corrélation temporelle du signal
-- Débit réduit par rapport au PCM
-- Sensible aux erreurs de transmission sans protection adéquate
-- Nécessite des stratégies de mitigation des erreurs
-
-Le choix entre PCM et DPCM dépend du contexte : qualité requise, fiabilité du canal de transmission, ressources disponibles (bande passante), et nature du signal (parole, musique, données).

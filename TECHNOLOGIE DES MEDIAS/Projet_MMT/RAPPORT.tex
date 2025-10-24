@@ -1,0 +1,137 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{float}
+\geometry{margin=2.5cm}
+
+\title{Rapport MMT}
+\author{Célian CHAUSSON}
+\date{Octobre 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Analyse du PCM}
+
+\subsection*{a. Création d'une tonalité sinusoïdale}
+Créer une tonalité sinusoïdale de fréquence $f = 2$ kHz, de 3 secondes de durée, en utilisant 10 échantillons (en float) par période. Reproduire cette tonalité sur les haut-parleurs de votre ordinateur.
+
+\subsection*{b. Quantification à 8 bits/échantillon}
+Quantifier ce signal en (int) à 8 bits/ech.
+
+Écouter fichier pcm\_8bits.wav
+
+\subsection*{c. Quantification avec différentes résolutions}
+Quantifier ce signal en utilisant une résolution de 6 bits/ech, de 4 bits/ech, de 3 bits/ech et de 2 bits/ech.
+
+\begin{itemize}
+    \item Écouter fichier pcm\_6bits.wav
+    \item Écouter fichier pcm\_4bits.wav
+    \item Écouter fichier pcm\_3bits.wav
+    \item Écouter fichier pcm\_2bits.wav
+\end{itemize}
+
+\subsection*{d. Quantification à 1 bit/échantillon}
+Que se passe-t-il quand la résolution du quantificateur devient 1 bit/ech ?
+
+Écouter fichier pcm\_1bits.wav
+
+\textbf{Analyse :} À 1 bit/échantillon, le quantificateur ne conserve que le signe du signal (positif ou négatif). Le signal reconstruit est une onde carrée alternant entre +1 et -1. Le son devient très mauvais, limite impossible à écouter, car seule la fréquence fondamentale est partiellement préservée avec de nombreuses harmoniques parasites.
+
+\textbf{Graphiques de comparaison :}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{PCM/pcm_comparison.png}
+    \caption{Comparaisons individuelles pour chaque résolution}
+    \label{fig:pcm_comparison}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{PCM/pcm_all_comparison.png}
+    \caption{Superposition de tous les niveaux}
+    \label{fig:pcm_all_comparison}
+\end{figure}
+
+\section{Analyse du DPCM}
+
+\subsection*{a. Comment se porte ce codeur en présence d'erreurs aléatoires}
+Comment se porte ce codeur si on est en présence d'erreurs aléatoires avec un taux d'erreur $p = 10^{-2}$ et $p = 10^{-3}$. Conclusions ?
+
+\textbf{Configuration :} Signal sinusoïdal 2 kHz, résolution $R = 8$ bits
+
+\begin{itemize}
+    \item Écouter fichier dpcm\_R8\_errors\_p1e\_02.wav
+    \item Écouter fichier dpcm\_R8\_errors\_p1e\_03.wav
+\end{itemize}
+
+\textbf{Analyse des résultats :}
+
+\begin{itemize}
+    \item \textbf{Avec $p = 10^{-2}$ :} Des erreurs sonores apparaissent. Le signal reste reconnaissable mais la qualité est dégradée de manière notable.
+    
+    \item \textbf{Avec $p = 10^{-3}$ :} La qualité reste correcte. Les erreurs sont moins perceptibles et espacées. Le signal est proche de la qualité sans erreur.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{DPCM/dpcm_comparison.png}
+    \caption{Comparaison DPCM - (1) Signal original, (2) DPCM avec $p = 10^{-2}$, (3) DPCM avec $p = 10^{-3}$}
+    \label{fig:dpcm_comparison}
+\end{figure}
+
+\textbf{Conclusions :}
+
+\begin{itemize}
+    \item Le DPCM est sensible aux erreurs binaires car chaque échantillon décodé dépend du précédent
+    \item Notre implémentation utilise le signal original pour éviter l'accumulation catastrophique des erreurs (réinitialisation du prédicteur)
+    \item Comparé au PCM, le DPCM nécessite des mécanismes de protection plus robustes (codes correcteurs, réinitialisation périodique)
+    \item Pour $p < 10^{-3}$, le système reste acceptable ; au-delà de $10^{-2}$, la qualité se dégrade rapidement
+\end{itemize}
+
+\subsection*{b. Quantification de la voix avec DPCM}
+Quantifier la voix de Xtine en utilisant une résolution de 8 bits/ech. Que se passe-t-il si on a un taux d'erreur binaire $p = 10^{-2}$ ?
+
+\textbf{Configuration :} Signal vocal ``XTINE'', résolution $R = 8$ bits, taux d'erreur $p = 10^{-2}$
+
+Écouter fichier xtine\_dpcm\_R8\_errors\_p1e\_02.wav
+
+\textbf{Analyse :}
+
+\begin{itemize}
+    \item \textbf{Signal sans erreur :} Le DPCM à 8 bits reconstruit le signal vocal avec une qualité élevée. Le SNR est élevé et la parole reste naturelle.
+    
+    \item \textbf{Avec erreurs $p = 10^{-2}$ :}
+    \begin{itemize}
+        \item La qualité vocale reste intelligible
+        \item Présence de clics ou artefacts audibles aux points d'erreur
+        \item La voix conserve son timbre général
+        \item Les erreurs sont perceptibles mais n'empêchent pas la compréhension
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{XTINE/xtine_dpcm_comparison.png}
+    \caption{Comparaison signal vocal XTINE - (1) Signal original, (2) DPCM $R=8$ sans erreurs, (3) DPCM $R=8$ avec erreurs $p = 10^{-2}$}
+    \label{fig:xtine_dpcm_comparison}
+\end{figure}
+
+\textbf{Comparaison avec le signal sinusoïdal :}
+
+\begin{itemize}
+    \item Le signal vocal est plus complexe (non périodique, large bande spectrale)
+    \item Les erreurs sont potentiellement moins perceptibles car masquées par le contenu vocal
+    \item L'oreille humaine est plus tolérante aux artefacts dans la parole que dans les tons purs
+\end{itemize}
+
+\textbf{Conclusion :} Le DPCM à 8 bits est adapté pour la compression de la parole, mais un taux d'erreur de $10^{-2}$ introduit des dégradations audibles. Pour des applications critiques (téléphonie, streaming), un taux d'erreur $< 10^{-3}$ est recommandé, avec des mécanismes de protection (codes correcteurs d'erreurs, réinitialisation périodique du prédicteur).
+
+\end{document}
