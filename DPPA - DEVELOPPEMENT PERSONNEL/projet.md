@@ -1,4 +1,5 @@
 ```mermaid
+%%{init: {'theme':'forest'}}%%
 mindmap
   root((Road to prof))
     Racines & Terre
