@@ -1,3 +1,5 @@
+# Mindmap
+
 ```mermaid
 %%{init: {'theme':'forest'}}%%
 mindmap
