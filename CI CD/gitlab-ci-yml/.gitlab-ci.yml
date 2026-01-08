@@ -1,0 +1,108 @@
+---
+stages:
+  - test
+  - build
+  - bundle
+  - deploy
+  - release
+
+lint_html:
+  stage: test
+  image: debian:13
+  script:
+    - apt update
+    - apt install -y tidy
+    - tidy -q index.html > /dev/null
+
+# compress_image:
+#   stage: build
+#   script:
+#     - apt update
+#     - apt install -y imagemagick
+#     - mkdir -p output
+#     - convert -compress JPEG -quality 70 logo-gitlab.jpeg output/logo-gitlab.jpeg
+#   artifacts:
+#     when: on_success
+#     expire_in: 7 days
+#     paths:
+#       - "output/"
+
+minify_css:
+  stage: build
+  image: node:24
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_TAG
+  script:
+    - npm install -g uglifycss
+    - mkdir -p output
+    - uglifycss style.css > output/style.css
+  artifacts:
+    when: on_success
+    expire_in: 7 days
+    paths:
+      - "output/"
+
+build_artifacts:
+  stage: bundle
+  script:
+    - echo "Building artifacts!"
+    - sed -i "s/Infos/$CI_COMMIT_AUTHOR - $CI_COMMIT_SHORT_SHA/g" index.html
+    - mkdir -p output
+    - cp index.html output/
+    - cp output/logo-gitlab.jpeg output/ || cp logo-gitlab.jpeg output/
+    - cp output/style.css output/ || cp style.css output/
+    - echo JOB_ID=$CI_JOB_ID > job_id.env
+    - ""
+  artifacts:
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - "output/"
+    reports:
+      dotenv: job_id.env
+
+.deploy:
+  stage: deploy
+  script:
+    - apt update
+    - apt install -y openssh-client
+    - mkdir ~/.ssh && chmod 700 -R ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 400 ~/.ssh/known_hosts
+    # - ssh -o StrictHostKeyChecking=accept-new root@192.168.56.30
+    # - scp -o StrictHostKeyChecking=accept-new -r output/* root@192.168.56.30:/var/www/html/
+    # - scp -r output/* root@192.168.56.30:/var/www/html/
+    - scp -r output/* root@192.168.56.30:/var/www/html/$CI_COMMIT_BRANCH
+    - ssh root@192.168.56.30 "chmod -R 755 /var/www/html/$CI_COMMIT_BRANCH"
+
+deploy_dev:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+deploy_main:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+create:release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  variables:
+    TAG: "$CI_COMMIT_TAG"
+  script:
+    - echo "Create Release $TAG"
+    - echo $JOB_ID
+  release:
+    name: "Release $TAG"
+    tag_name: "$TAG"
+    ref: "$TAG"
+    description: "Release $TAG"
+    assets:
+      links:
+        - name: "cicd.zip"
+          url: "http://gitlab.example.com/cicd/tp-ci-cd/-/jobs/$JOB_ID/artifacts/download"
+  rules:
+    - if: $CI_COMMIT_TAG

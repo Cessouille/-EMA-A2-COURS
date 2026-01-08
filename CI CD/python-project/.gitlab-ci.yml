@@ -1,0 +1,111 @@
+---
+stages:
+  - test
+  - build
+  - bundle
+  - deploy
+
+lint:
+  stage: test
+  image: python:3.14
+  script:
+    - pip install -r requirements.txt
+    - pip install pylint
+    - pylint hello.py
+
+security:
+  stage: test
+  image: python:3.14
+  script:
+    - pip install bandit
+    - bandit hello.py
+
+format:
+  stage: test
+  image: python:3.14
+  script:
+    - pip install black
+    - black --check --diff hello.py
+
+tests:
+  stage: test
+  image: python:3.14
+  script:
+    - pip install -r requirements.txt
+    - pip install pytest
+    - pytest
+
+minify_js:
+  stage: build
+  image: node:24
+  rules:
+    - if: $CI_COMMIT_BRANCH == "preprod" || $CI_COMMIT_BRANCH == "prod"
+  script:
+    - npm install uglify-js -g
+    - mkdir -p hello
+    - uglifyjs static/script.js > hello/script.js
+  artifacts:
+    when: on_success
+    expire_in: 7 days
+    paths:
+      - "hello/"
+
+build_artifacts:
+  stage: bundle
+  image: python:3.14
+  script:
+    - echo "Building artifacts!"
+    - mkdir -p hello/static hello/templates
+    - |
+      if [ -f hello/script.js ]; then
+        cp hello/script.js hello/static/
+      else
+        cp static/script.js hello/static/
+      fi
+    - cp static/logo-gitlab.jpeg hello/static/
+    - cp -r templates/* hello/templates/
+    - cp hello.py conf.py requirements.txt hello/
+    - sed -i "s/COMMIT_DATE=\"\"/COMMIT_DATE=\"$CI_COMMIT_TIMESTAMP\"/g" conf.py
+    - sed -i "s/COMMIT_SHORT_HASH=\"\"/COMMIT_SHORT_HASH=\"$CI_COMMIT_SHORT_SHA\"/g" conf.py
+    - sed -i "s/COMMIT_AUTHOR=\"\"/COMMIT_AUTHOR=\"$CI_COMMIT_AUTHOR\"/g" conf.py
+    - sed -i "s/COMMIT_BRANCH=\"\"/COMMIT_BRANCH=\"$CI_COMMIT_BRANCH\"/g" conf.py
+  artifacts:
+    when: on_success
+    expire_in: 30 days
+    paths:
+      - "hello/"
+
+.deploy:
+  stage: deploy
+  before_script:
+    - apt update
+    - apt install -y openssh-client
+    - mkdir ~/.ssh && chmod 700 -R ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa
+    - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts && chmod 400 ~/.ssh/known_hosts
+    - mkdir -p deploy
+  when: manual
+
+deploy_preprod:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "preprod"
+  script:
+    - apt install zip -y
+    - zip -r deploy/hello_$CI_COMMIT_BRANCH.zip hello/
+    - scp -r deploy/* root@192.168.56.30:/root/
+    - ssh root@192.168.56.30 "chmod -R 700 /root/"
+
+deploy_prod:
+  extends: .deploy
+  rules:
+    - if: $CI_COMMIT_BRANCH == "prod"
+  script:
+    - tar -czf deploy/hello_$CI_COMMIT_BRANCH.tar.gz hello/
+    - scp -r deploy/* root@192.168.56.30:/root/
+    - ssh root@192.168.56.30 "cd /root && tar -xzf hello_$CI_COMMIT_BRANCH.tar.gz"
+    - ssh root@192.168.56.30 "chmod -R 700 /root/hello"
+    - ssh root@192.168.56.30 "apt update && apt install -y python3 python3-venv python3-pip"
+    - ssh root@192.168.56.30 "cd /root/hello && python3 -m venv venv"
+    - ssh root@192.168.56.30 "cd /root/hello && ./venv/bin/pip install -r requirements.txt"
+    - ssh root@192.168.56.30 "cd /root/hello && ./venv/bin/flask --app hello run --host=0.0.0.0 &"

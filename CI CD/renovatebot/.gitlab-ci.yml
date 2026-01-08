@@ -1,0 +1,2 @@
+include:
+  - remote: https://gitlab.com/renovate-bot/renovate-runner/-/raw/v25.0.0/templates/renovate.gitlab-ci.yml

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>Cours CI/CD</title>
+    </head>
+    <body>
+        <h1>{{ message }}</h1>
+        <img src="{{ url_for('static', filename='logo-gitlab.jpeg') }}" alt="Logo Gitlab" width="500">
+        <p>Commité le {{ commit_date }} par {{ commit_author }} sur l'environnement {{ commit_branch }}</p>
+        <p id="time"></p>
+        <script src="{{ url_for('static', filename='script.js') }}" charset="utf-8"></script>
+    </body>
+</html>
