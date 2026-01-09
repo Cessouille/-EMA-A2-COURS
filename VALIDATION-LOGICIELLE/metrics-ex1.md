@@ -5,10 +5,10 @@ NOM = Number of lines
 
 | Class | LOC | NOM | Responsability |
 | ----- | --- | --- | -------------- |
-| BankAccount | 469 | 20 | Get and set information about bank account |
-| Person | 324 | 23 | Get, set and validate information about person |
-| BankAccountApp | 482 | 2 | Initialize bank account |
-| Bank | 412 | 14 | Get information about bank and its accounts, CRUD on accounts |
+| `BankAccount` | 469 | 20 | Get and set information about bank account |
+| `Person` | 324 | 23 | Get, set and validate information about person |
+| `BankAccountApp` | 482 | 2 | Initialize bank account |
+| `Bank` | 412 | 14 | Get information about bank and its accounts, CRUD on accounts |
 
 ## Do you feel its size roughly matches its responsibility?
 

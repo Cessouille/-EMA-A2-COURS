@@ -6,6 +6,7 @@
 package bankAccountApp;
 
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,6 +14,9 @@ import java.util.Scanner;
  */
 public class BankAccountApp {
 
+	private static final Logger logger = Logger.getLogger(BankAccountApp.class.getName());
+
+	private static final String ACCOUNT_NOT_EXIST = "Account dosen't exist";
 
 	/**
 	 * @param args the command line arguments
@@ -136,7 +140,7 @@ public class BankAccountApp {
 					number = scan.nextInt();
 					BankAccount tmpacc = accManager.findAccount(number);
 					if (tmpacc == null) {
-						System.out.println("Account dosen't exist");
+						logger.info(ACCOUNT_NOT_EXIST);
 						break;
 					}
 					accManager.deleteAccount(number);
@@ -151,7 +155,7 @@ public class BankAccountApp {
 						number = scan.nextInt();
 						BankAccount tmpacc = accManager.findAccount(number);
 						if (tmpacc == null) {
-							System.out.println("Account dosen't exist");
+							System.out.println(ACCOUNT_NOT_EXIST);
 							break;
 						}
 						System.out.println("Balance is: " + tmpacc.getBalance());
@@ -162,7 +166,7 @@ public class BankAccountApp {
 						number = scan.nextInt();
 						BankAccount tmpacc = accManager.findAccount(number);
 						if (tmpacc == null) {
-							System.out.println("Account dosen't exist");
+							System.out.println(ACCOUNT_NOT_EXIST);
 							break;
 						} else {
 							System.out.println("Enter an amount to deposit");
@@ -175,7 +179,7 @@ public class BankAccountApp {
 						number = scan.nextInt();
 						BankAccount tmpacc = accManager.findAccount(number);
 						if (tmpacc == null) {
-							System.out.println("Account dosen't exist");
+							System.out.println(ACCOUNT_NOT_EXIST);
 							break;
 						} else {
 							System.out.println("Enter an amount to withdraw");
