@@ -1,6 +1,6 @@
 # Exercice 2
 
-## 1. Chosen method
+## Chosen method
 
 The method `withdrawMoney` has a cyclomatic complexity value of 5.
 
@@ -22,13 +22,13 @@ public boolean withdrawMoney(double withdrawAmount) {
 }
 ```
 
-## 2. Proposed refactoring
+## Proposed refactoring
 
-I would extract the if with 4 conditions into a helper method, it would greatly decrease the cyclomatic complexity.
+I would extract the `if` with 4 conditions into a helper method, it would greatly decrease the cyclomatic complexity.
 
 I would name the helper method `checkWithdrawConditions`.
 
-## 3. Bonus
+## Bonus
 
 ```java
 public boolean withdrawMoney(double withdrawAmount) {
