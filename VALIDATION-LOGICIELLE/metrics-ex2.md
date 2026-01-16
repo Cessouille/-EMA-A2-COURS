@@ -6,20 +6,20 @@ The method `withdrawMoney` has a cyclomatic complexity value of 5.
 
 ```java
 public boolean withdrawMoney(double withdrawAmount) {
-        if (                                                    // decision point (4 conditions)
-            withdrawAmount >= 0 && 
-            balance >= withdrawAmount && 
-            withdrawAmount < withdrawLimit && 
-            withdrawAmount + amountWithdrawn <= withdrawLimit 
-        ) {
-            balance = balance - withdrawAmount;
-            success = true;
-            amountWithdrawn += withdrawAmount;
-        } else {                                                // decision point (1 condition)
-            success = false;
-        }
-        return success;
+    if (                                                    // decision point (4 conditions)
+        withdrawAmount >= 0 && 
+        balance >= withdrawAmount && 
+        withdrawAmount < withdrawLimit && 
+        withdrawAmount + amountWithdrawn <= withdrawLimit 
+    ) {
+        balance = balance - withdrawAmount;
+        success = true;
+        amountWithdrawn += withdrawAmount;
+    } else {                                                // decision point (1 condition)
+        success = false;
     }
+    return success;
+}
 ```
 
 ## 2. Proposed refactoring
